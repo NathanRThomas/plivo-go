@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	//"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -52,17 +52,23 @@ func (m Message) toMap() map[string]string {
 }
 
 // Send to send SMS.
-func (m Message) Send() {
+func (m Message) Send() error {
 	jsonData, _ := json.Marshal(m.toMap())
 	req, _ := http.NewRequest("POST", m.URL("/Message/"), bytes.NewReader(jsonData))
 	req.URL.User = url.UserPassword(m.account.User, m.account.Password)
 	req.Header = http.Header{"Content-Type": {"application/json"}}
 	if resp, err := httpClient.Do(req); err == nil {
-		if body, err := ioutil.ReadAll(resp.Body); err == nil {
+		//if body, err := ioutil.ReadAll(resp.Body); err == nil {
+        if _, err := ioutil.ReadAll(resp.Body); err == nil {
 			defer resp.Body.Close()
-			log.Printf("%s\n%s\n", m.String(), body)
-		}
-	}
+			//log.Printf("%s\n%s\n", m.String(), body)
+            return nil
+		} else {
+            return err
+        }
+	} else {
+        return err
+    }
 }
 
 // String to print string.
